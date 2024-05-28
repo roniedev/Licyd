@@ -1,0 +1,181 @@
+* {
+  font-family: $body-font-family;
+}
+
+// body {
+//   background-color: #cceaff;
+// }
+
+.q-separator {
+  margin: 15px 0;
+  color: rgb(0, 0, 0, 0.2);
+}
+
+.q-drawer {
+  border: none;
+}
+
+#menu-lateral {
+  font-size: 13.5px;
+  padding: 10px;
+}
+
+#menu-lateral {
+  .q-icon {
+    font-size: 18px;
+    color: $white;
+  }
+}
+
+#menu-lateral {
+  .q-item {
+    border-radius: 10px 10px 10px 10px;
+    padding: 7.5px;
+  }
+}
+
+#menu-lateral {
+  .q-expansion-item__content {
+    margin-left: 18px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+}
+
+#main-content {
+  padding: 10px;
+}
+
+.q-card {
+  border-radius: $border-radius;
+}
+
+.option-group {
+  border: 1px solid rgb(0, 0, 0, 0.25);
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 5px 5px 0.5px 10px;
+  margin-bottom: 5px;
+}
+
+.option-group .label {
+  font-size: 12px;
+  margin-left: 2.5px;
+  color: $label-color;
+}
+
+.option-group--dense {
+  border: 1px solid rgb(0, 0, 0, 0.25);
+  border-radius: $border-radius;
+  font-size: 10px;
+  padding: 5px 5px 2px 10px;
+  margin-bottom: 5px;
+}
+
+.option-group--dense .label {
+  font-size: 10px;
+}
+
+.option-group:hover,
+.option-group--dense:hover {
+  border: 1px solid #000;
+}
+
+.q-select {
+  margin-bottom: 5px;
+}
+
+.q-btn {
+  border-radius: $border-radius;
+}
+
+// * {
+//   font-family: $body-font-family;
+// }
+
+// body {
+//   background-color: #b9d9e9;
+// }
+
+// .q-separator {
+//   margin: 15px 0;
+//   color: rgb(0, 0, 0, 0.2);
+// }
+
+// .q-drawer {
+//   border: none;
+// }
+
+// #menu-lateral {
+//   font-size: 13.5px;
+//   padding: 10px;
+// }
+
+// #menu-lateral {
+//   .q-icon {
+//     font-size: 18px;
+//     color: $white;
+//   }
+// }
+
+// #menu-lateral {
+//   .q-item {
+//     border-radius: 10px 10px 10px 10px;
+//     padding: 7.5px;
+//   }
+// }
+
+// #menu-lateral {
+//   .q-expansion-item__content {
+//     margin-left: 18px;
+//     margin-top: 5px;
+//     margin-bottom: 5px;
+//   }
+// }
+
+// #main-content {
+//   padding: 10px;
+// }
+
+// // .q-card {
+// //   border-radius: $border-radius;
+// // }
+
+// .option-group {
+//   border: 1px solid rgb(0, 0, 0, 0.25);
+//   border-radius: 5px;
+//   font-size: 12px;
+//   padding: 5px 5px 0.5px 10px;
+//   margin-bottom: 5px;
+// }
+
+// .option-group .label {
+//   font-size: 12px;
+//   margin-left: 2.5px;
+//   color: $label-color;
+// }
+
+// .option-group--dense {
+//   border: 1px solid rgb(0, 0, 0, 0.25);
+//   border-radius: $border-radius;
+//   font-size: 10px;
+//   padding: 5px 5px 2px 10px;
+//   margin-bottom: 5px;
+// }
+
+// .option-group--dense .label {
+//   font-size: 10px;
+// }
+
+// .option-group:hover,
+// .option-group--dense:hover {
+//   border: 1px solid #000;
+// }
+
+// .q-select {
+//   margin-bottom: 5px;
+// }
+
+// .q-btn {
+//   border-radius: $border-radius;
+// }
