@@ -1,13 +1,13 @@
 <template>
   <div class="row" style="height: 100vh">
     <div
-      class="col-0 col-md-4 flex justify-center content-center"
+      class="col-0 col-md-3 flex justify-center content-center"
       style="background-color: #fff"
     >
       <img src="img/logo-teuto2.png" class="responsive" alt="Logo Teuto" />
     </div>
     <div
-      class="col-12 col-md-8"
+      class="col-12 col-md-9"
       style="background-color: #004170"
       :class="
         $q.screen.sm || $q.screen.xs
@@ -31,7 +31,7 @@
             alt="Logo Teuto"
           />
         </div>
-        <div class="col-12 flex justify-center q-mt-md">
+        <div class="col-12 flex justify-center">
           <q-card
             flat
             class="q-pb-md q-ma-lg q-pa-sm"
@@ -43,20 +43,14 @@
           >
             <q-card-section>
               <div>
-                <div
-                  class="col text-h5 ellipsis flex justify-center"
-                  v-if="false"
-                >
+                <div class="col text-h5 ellipsis flex justify-center">
                   <h2
                     class="text-h5 text-uppercase q-my-none text-weight-regular"
                   >
                     {{ aplicacaoCodigo }}
                   </h2>
                 </div>
-                <div
-                  class="col ellipsis flex justify-center q-mt-xs"
-                  v-if="false"
-                >
+                <div class="col ellipsis flex justify-center q-mt-xs">
                   <p class="text-subtitle2 q-my-none text-weight-regular">
                     {{ aplicacaoNome }}
                   </p>
@@ -64,11 +58,10 @@
               </div>
               <q-form class="q-gutter-md q-mt-md" @submit.prevent="onSubmit">
                 <q-input
-                  label="Nome de usuário"
-                  v-model="userName"
+                  label="Usuário de rede"
+                  v-model="usuarioRede"
                   hide-bottom-space
-                  lazy-rules
-                  :rules="[(val) => !!val || 'Informe o nome de usuário']"
+                  :rules="[(val) => !!val || 'Informe o usuário de rede']"
                 >
                   <template v-slot:prepend>
                     <q-icon name="mdi-account-outline" size="xs" />
@@ -77,8 +70,7 @@
                 <q-input
                   label="Senha"
                   type="password"
-                  v-model="password"
-                  lazy-rules
+                  v-model="senha"
                   hide-bottom-space
                   :rules="[(val) => !!val || 'Informe a senha']"
                 >
@@ -108,7 +100,7 @@
 import ILogin from 'src/interfaces/ILogin';
 import AuthService from 'src/services/AuthService';
 import RouterService from 'src/services/RouterService';
-import useAutenticacaoStore from 'src/stores/auth-store';
+import useAutenticacaoStore from 'src/stores/autenticacao.store';
 import { defineComponent, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -122,21 +114,23 @@ export default defineComponent({
     const useAutenticacao = useAutenticacaoStore();
     const routerService = new RouterService('menu', router);
 
-    const userName = ref('');
-    const password = ref('');
+    const senha = ref('');
+    const usuarioRede = ref('');
     const aplicacaoNome = ref(process.env.APLICACAO_NOME);
     const aplicacaoCodigo = ref(process.env.APLICACAO_CODIGO);
+    const identificador = ref(process.env.IDENTIFICADOR);
 
     async function onSubmit() {
       const loginValues: ILogin = {
-        userName: userName.value,
-        password: password.value,
+        usuarioRede: usuarioRede.value,
+        senha: senha.value,
+        identificador: identificador.value || '',
       };
 
       var isLogged = await service.login(loginValues);
 
       if (isLogged && useAutenticacao.authenticated && useAutenticacao.user) {
-        const routes = useAutenticacao.modules;
+        const routes = useAutenticacao.routes;
         routerService.removerRotasSemPermisao(routes);
 
         const redirect = route.query.redirect as string | undefined;
@@ -145,8 +139,8 @@ export default defineComponent({
     }
 
     return {
-      userName,
-      password,
+      usuarioRede,
+      senha,
       aplicacaoNome,
       aplicacaoCodigo,
       onSubmit,
@@ -189,5 +183,5 @@ export default defineComponent({
   margin-bottom: 10px
 
 .top-login
-  padding-top: 75px
+  padding-top: 125px
 </style>

@@ -1,7 +1,7 @@
-import { IGetAllRequest } from 'src/interfaces/IGetAllRequest';
-import { IGetAllResponse } from 'src/interfaces/IGetAllResponse';
 import { ITableColumn } from './ITableColumn';
 import { ITableAction } from './ITableAction';
+import { IGetAllRequest } from './IGetAllRequest';
+import { IGetAllResponse } from './IGetAllResponse';
 
 export interface IJumpTableServer {
   columns: Array<ITableColumn>;

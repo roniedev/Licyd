@@ -1,14 +1,13 @@
 ﻿#pragma warning disable IDE0290
 
-using BaseLib;
+using Core;
 using Domain;
 
-namespace Data
+namespace Data;
+
+public class DocumentoRepository : CrudEfRepository<Documento>
 {
-    public class DocumentoRepository : CrudEfRepository<Documento>, IDocumentoRepository
+    public DocumentoRepository(BaseDbContext context, AppSettings appSettings) : base(context, appSettings)
     {
-        public DocumentoRepository(BaseDbContext context, AppSettings appSettings) : base(context, appSettings)
-        {
-        }
     }
 }

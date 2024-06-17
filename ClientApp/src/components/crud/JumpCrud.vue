@@ -44,7 +44,7 @@ export default defineComponent({
     const isJumpCrudTableVisible = ref<boolean>(true);
 
     const handleSubmit = async (formValues: any) => {
-      let result = false;
+      let result: boolean;
 
       if (formValues.id) {
         result = await props.crud.jumpCrudTable.service.update(formValues);
@@ -61,6 +61,14 @@ export default defineComponent({
     const toggleVisibility = () => {
       isJumpCrudTableVisible.value = !isJumpCrudTableVisible.value;
       isJumpFormVisible.value = !isJumpFormVisible.value;
+
+      if (isJumpCrudTableVisible.value) {
+        // eslint-disable-next-line vue/no-mutating-props
+        props.crud.jumpForm.data = undefined;
+        props.crud.jumpForm.fields.forEach(
+          (field) => (field.value = undefined)
+        );
+      }
     };
 
     const refreshData = () => {
@@ -70,10 +78,14 @@ export default defineComponent({
     const edit = async (row: any) => {
       const data = await props.crud.jumpCrudTable.service.getById(row.id);
 
-      if (data) {
-        // eslint-disable-next-line vue/no-mutating-props
-        props.crud.jumpForm.data = data;
-      }
+      // eslint-disable-next-line vue/no-mutating-props
+      if (data) props.crud.jumpForm.data = data;
+
+      // if (data) {
+      //   props.crud.jumpForm.fields.forEach((field) => {
+      //     field.value = data[field.name];
+      //   });
+      // }
 
       toggleVisibility();
     };

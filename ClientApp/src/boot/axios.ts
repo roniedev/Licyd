@@ -1,8 +1,8 @@
 import { boot } from 'quasar/wrappers';
 import axios, { AxiosInstance } from 'axios';
-import { hideLoading, showLoading } from './helpers/LoadingHelper';
-import { notificate } from './helpers/NotificationHelper';
-import useAutenticacaoStore from 'src/stores/auth-store';
+import { hideLoading, showLoading } from 'src/helpers/Loading';
+import { notificate } from 'src/helpers/Notificate';
+import useAutenticacaoStore from 'src/stores/autenticacao.store';
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -10,15 +10,6 @@ declare module '@vue/runtime-core' {
     $api: AxiosInstance;
   }
 }
-
-// Be careful when using SSR for cross-request state pollution
-// due to creating a Singleton instance here;
-// If any client changes this (global) instance, it might be a
-// good idea to move this instance creation inside of the
-// "export default () => {}" function below (which runs individually
-// for each client)
-// const api = axios.create({ baseURL: 'https://localhost:7064/api/' });
-// const api = axios.create({ baseURL: 'https://dummyjson.com/' });
 
 const getAxiosInstance = (urlApi?: string): AxiosInstance => {
   const url = urlApi ? urlApi : process.env.API_URL;
@@ -29,9 +20,9 @@ const getAxiosInstance = (urlApi?: string): AxiosInstance => {
     const useAutenticacao = useAutenticacaoStore();
 
     if (useAutenticacao.authenticated) {
+      request.headers['X-Identificador-Aplicacao'] = 'CML0036';
       request.headers['Authorization'] = `Bearer ${useAutenticacao.token}`;
-      request.headers['X-Usuario-Id'] = useAutenticacao.user?.id;
-      request.headers['X-User-Name'] = useAutenticacao.user?.userName;
+      request.headers['X-User-Name'] = useAutenticacao.username;
       request.headers['X-Usuario-Nome'] = useAutenticacao.user?.nome;
       request.headers['X-Usuario-Email'] = useAutenticacao.user?.email;
     }
@@ -51,7 +42,7 @@ const getAxiosInstance = (urlApi?: string): AxiosInstance => {
         notificate(
           'O servidor de aplicação está offline, favor entrar em contato com o suporte.',
           'negative',
-          'top-left'
+          'top'
         );
 
         return error;
@@ -75,7 +66,13 @@ const getAxiosInstance = (urlApi?: string): AxiosInstance => {
           if (isAlterarSenha) {
             changePasswordRedirect(data[0].descricao);
           } else {
-            notificate(data[0].message, 'warning', 'top', 5000);
+            const isSemAcessoAction = data.some((item: any) => {
+              return item.code === 'SemAcessoAction';
+            });
+
+            if (isSemAcessoAction) {
+              notificate(data[0].message, 'warning', 'top', 7000);
+            }
           }
         } else {
           useAutenticacaoStore().delete();
@@ -94,7 +91,7 @@ const getAxiosInstance = (urlApi?: string): AxiosInstance => {
 
         const tipoNotificacao =
           error.response.status === 500 ? 'negative' : 'warning';
-        notificate(errors, tipoNotificacao, 'top-left', 10000, true);
+        notificate(errors, tipoNotificacao, 'top', 10000, true);
 
         return error;
       }
@@ -118,14 +115,14 @@ export function redirecionarLogin() {
   notificate(
     'O token de acesso expirou, faça login novamente.',
     'positive',
-    'top-left',
-    5000
+    'top',
+    7000
   );
   window.location.href = getUrlBase() + '/#/login';
 }
 
 export function changePasswordRedirect(mensagem: string) {
-  notificate(mensagem, 'positive', 'top-left', 5000);
+  notificate(mensagem, 'positive', 'top', 7000);
   window.location.href = getUrlBase() + '/#/user/changepassword';
 }
 

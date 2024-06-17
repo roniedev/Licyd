@@ -43,6 +43,7 @@ export default defineComponent({
   emits: ['update:modelValue'],
 
   setup(props, { emit }) {
+    // eslint-disable-next-line vue/no-setup-props-destructure
     const modelValue = ref(
       props.input.type === FormElementType.radio
         ? ref<any>
@@ -88,7 +89,6 @@ export default defineComponent({
 
 <style lang="sass">
 .jump-option-group
-  border-radius: 4px
   margin-top: 10px
 
   .q-radio
@@ -104,7 +104,6 @@ export default defineComponent({
   position: relative
   border: 1px solid rgba(0, 0, 0, 0.24)
   padding: 5px
-  border-radius: 4px
   margin-top: 10px
 
   .q-radio

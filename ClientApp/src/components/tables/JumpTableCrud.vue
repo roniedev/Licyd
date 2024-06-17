@@ -26,9 +26,10 @@
           title="Novo"
           icon="mdi-plus"
           size="md"
-          v-if="hasInsertPermission && (crudTable.showAddButton ?? true)"
+          v-if="hasInsertPermission"
           @click="onClickNew"
         />
+        <button-dropdown :prop="headerActions" />
       </template>
     </jump-table>
     <q-dialog v-model="inactivateFormVisible">
@@ -38,6 +39,106 @@
         @submit="onSubmitInactivateForm"
       />
     </q-dialog>
+
+    <q-dialog persistent v-model="inserirPorImportacaoDialog">
+      <jump-form
+        style="width: 500px"
+        :form="inserirPlanilhaForm"
+        @submit="insertByImportSubmit"
+        @cancel="inserirPorImportacaoDialog = !inserirPorImportacaoDialog"
+      >
+        <template v-slot:left-actions-after>
+          <q-btn
+            flat
+            size="md"
+            color="green"
+            icon="mdi-download"
+            label="layout"
+            @click="getInsertLayout"
+          />
+        </template>
+      </jump-form>
+    </q-dialog>
+
+    <q-dialog persistent v-model="atualizarPorImportacaoDialog">
+      <jump-form
+        style="width: 500px"
+        :form="alterarPlanilhaForm"
+        @submit="updateByImportSubmit"
+        @cancel="atualizarPorImportacaoDialog = !atualizarPorImportacaoDialog"
+      >
+        <template v-slot:left-actions-after>
+          <q-btn
+            flat
+            size="md"
+            color="green"
+            icon="mdi-download"
+            label="layout"
+            @click="getUpdateLayout"
+          />
+        </template>
+      </jump-form>
+    </q-dialog>
+
+    <q-dialog persistent v-model="inativarPorImportacaoDialog">
+      <jump-form
+        style="width: 500px"
+        :form="inativarPlanilhaForm"
+        @submit="inactivateByImportSubmit"
+        @cancel="inativarPorImportacaoDialog = !inativarPorImportacaoDialog"
+      >
+        <template v-slot:left-actions-after>
+          <q-btn
+            flat
+            size="md"
+            color="green"
+            icon="mdi-download"
+            label="layout"
+            @click="getInactivateLayout"
+          />
+        </template>
+      </jump-form>
+    </q-dialog>
+
+    <q-dialog persistent v-model="excluirPorImportacaoDialog">
+      <jump-form
+        style="width: 500px"
+        :form="excluirPlanilhaForm"
+        @submit="excluirByImportSubmit"
+        @cancel="excluirPorImportacaoDialog = !excluirPorImportacaoDialog"
+      >
+        <template v-slot:left-actions-after>
+          <q-btn
+            flat
+            size="md"
+            color="green"
+            icon="mdi-download"
+            label="layout"
+            @click="getDeleteLayout"
+          />
+        </template>
+      </jump-form>
+    </q-dialog>
+
+    <q-dialog persistent v-model="ativarPorImportacaoDialog">
+      <jump-form
+        style="width: 500px"
+        :form="ativarPlanilhaForm"
+        @submit="ativarByImportSubmit"
+        @cancel="ativarPorImportacaoDialog = !ativarPorImportacaoDialog"
+      >
+        <template v-slot:left-actions-after>
+          <q-btn
+            flat
+            size="md"
+            color="green"
+            icon="mdi-download"
+            label="layout"
+            @click="getActivateLayout"
+          />
+        </template>
+      </jump-form>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -45,16 +146,18 @@
 import JumpTable from './JumpTable.vue';
 import JumpForm from '../forms/JumpForm.vue';
 import IJumpTableCrud from './interfaces/IJumpTableCrud';
-import useAutenticacaoStore from 'src/stores/auth-store';
+import ButtonDropdown from '../buttons/ButtonDropdown.vue';
+import useAutenticacaoStore from 'src/stores/autenticacao.store';
 
 import { Dialog } from 'quasar';
-import { ref, onBeforeMount, defineComponent, watch } from 'vue';
+import { ref, onBeforeMount, defineComponent } from 'vue';
 import { IJumpForm } from '../forms/interfaces/IJumpForm';
 import { FormElementType } from '../forms/enums/FormElementType';
 import { IJumpInput } from '../forms/interfaces/IJumpInput';
 import { IJumpTable } from './interfaces/IJumpTable';
-import { IBaseInactivate } from 'src/interfaces/IBaseInactivate';
-import { ITableFilter } from './interfaces/ITableFilter';
+import { IBaseInactivate } from './interfaces/IBaseInactivate';
+import { IJumpInputFile } from '../forms/interfaces/IJumpInputFile';
+import { IButtonDropdown } from '../buttons/interfaces/IButtonDropdown';
 
 export default defineComponent({
   name: 'JumpCrudTable',
@@ -62,6 +165,7 @@ export default defineComponent({
   components: {
     JumpTable,
     JumpForm,
+    ButtonDropdown,
   },
 
   props: {
@@ -75,24 +179,148 @@ export default defineComponent({
 
   setup(props, { emit }) {
     let rowId = 0;
+    const store = useAutenticacaoStore();
 
     const tableRef = ref<any>(null);
-
-    const filters = ref<Array<ITableFilter>>([]);
-
     const refresh = ref<number>(0);
+    const inserirFormVisible = ref<boolean>(false);
     const inactivateFormVisible = ref<boolean>(false);
 
-    const store = useAutenticacaoStore();
+    const inserirPorImportacaoDialog = ref<boolean>(false);
+    const inativarPorImportacaoDialog = ref<boolean>(false);
+    const atualizarPorImportacaoDialog = ref<boolean>(false);
+    const excluirPorImportacaoDialog = ref<boolean>(false);
+    const ativarPorImportacaoDialog = ref<boolean>(false);
+
+    const headerActions = ref<IButtonDropdown>({
+      dense: true,
+      flat: true,
+      items: [
+        {
+          label: 'Inserir por planilha',
+          onClick: () => {
+            inserirPorImportacaoDialog.value =
+              !inserirPorImportacaoDialog.value;
+          },
+          visible: () => {
+            const habilitado = props.crudTable.showInsertImport != false;
+
+            const download = store.validarPaginaAcao(
+              component,
+              'GetInsertLayout'
+            );
+
+            const importar = store.validarPaginaAcao(
+              component,
+              'InsertByImport'
+            );
+
+            return habilitado && download && importar;
+          },
+        },
+        {
+          label: 'Alterar por planilha',
+          onClick: () => {
+            atualizarPorImportacaoDialog.value =
+              !atualizarPorImportacaoDialog.value;
+          },
+          visible: () => {
+            const habilitado = props.crudTable.showUpdateImport != false;
+
+            const download = store.validarPaginaAcao(
+              component,
+              'GetUpdateLayout'
+            );
+
+            const importar = store.validarPaginaAcao(
+              component,
+              'UpdateByImport'
+            );
+
+            return habilitado && download && importar;
+          },
+        },
+        {
+          label: 'Inativar por planilha',
+          onClick: () => {
+            inativarPorImportacaoDialog.value =
+              !inativarPorImportacaoDialog.value;
+          },
+          visible: () => {
+            const habilitado = props.crudTable.showInactivateImport != false;
+
+            const download = store.validarPaginaAcao(
+              component,
+              'InactivateByImport'
+            );
+
+            const importar = store.validarPaginaAcao(
+              component,
+              'GetInactivateLayout'
+            );
+
+            return habilitado && download && importar;
+          },
+        },
+        {
+          label: 'Excluir por planilha',
+          onClick: () => {
+            excluirPorImportacaoDialog.value =
+              !excluirPorImportacaoDialog.value;
+          },
+          visible: () => {
+            const habilitado = props.crudTable.showDeleteImport != false;
+
+            const download = store.validarPaginaAcao(
+              component,
+              'DeleteByImport'
+            );
+
+            const importar = store.validarPaginaAcao(
+              component,
+              'GetDeleteLayout'
+            );
+
+            return habilitado && download && importar;
+          },
+        },
+        {
+          label: 'Ativar por planilha',
+          onClick: () => {
+            ativarPorImportacaoDialog.value = !ativarPorImportacaoDialog.value;
+          },
+          visible: () => {
+            const habilitado = props.crudTable.showActivateImport != false;
+
+            const download = store.validarPaginaAcao(
+              component,
+              'ActivateByImport'
+            );
+
+            const importar = store.validarPaginaAcao(
+              component,
+              'GetActivateLayout'
+            );
+
+            return habilitado && download && importar;
+          },
+        },
+      ],
+    });
+
+    // eslint-disable-next-line vue/no-setup-props-destructure
     const component = props.crudTable.componentName;
 
-    const hasGetAllPaginatedPermission = store.temAcessoNaAcao(
+    const hasGetAllPaginatedPermission = store.validarPaginaAcao(
       component,
       'GetAllPaginated'
     );
 
-    const hasInsertPermission = store.temAcessoNaAcao(component, 'Insert');
-    const hasExportPermission = store.temAcessoNaAcao(component, 'Export');
+    const hasInsertPermission = store.validarPaginaAcao(component, 'Insert');
+    const hasExportPermission = store.validarPaginaAcao(
+      component,
+      'ExportToExcel'
+    );
 
     const inactivateForm = ref<IJumpForm>({
       title: 'Inativar registro',
@@ -107,6 +335,67 @@ export default defineComponent({
       ],
     });
 
+    const inserirPlanilhaForm = ref<IJumpForm>({
+      title: 'Inserir por planilha',
+      fields: [
+        {
+          name: 'file',
+          label: 'Planilha',
+          type: FormElementType.file,
+          style: 'outlined',
+        } as IJumpInputFile,
+      ],
+    });
+
+    const alterarPlanilhaForm = ref<IJumpForm>({
+      title: 'Atualizar por planilha',
+      fields: [
+        {
+          name: 'file',
+          label: 'Planilha',
+          type: FormElementType.file,
+          style: 'outlined',
+        } as IJumpInputFile,
+      ],
+    });
+
+    const inativarPlanilhaForm = ref<IJumpForm>({
+      title: 'Inativar por planilha',
+      fields: [
+        {
+          name: 'file',
+          label: 'Planilha',
+          type: FormElementType.file,
+          style: 'outlined',
+        } as IJumpInputFile,
+      ],
+    });
+
+    const excluirPlanilhaForm = ref<IJumpForm>({
+      title: 'Excluir por planilha',
+      fields: [
+        {
+          name: 'file',
+          label: 'Planilha',
+          type: FormElementType.file,
+          style: 'outlined',
+        } as IJumpInputFile,
+      ],
+    });
+
+    const ativarPlanilhaForm = ref<IJumpForm>({
+      title: 'Ativar por planilha',
+      fields: [
+        {
+          name: 'file',
+          label: 'Planilha',
+          type: FormElementType.file,
+          style: 'outlined',
+        } as IJumpInputFile,
+      ],
+    });
+
+    // eslint-disable-next-line vue/no-setup-props-destructure
     const table = ref<IJumpTable>({
       title: props.crudTable.title,
       columns: props.crudTable.columns,
@@ -119,9 +408,8 @@ export default defineComponent({
       rows: props.crudTable.rows,
       maxColumnWidth: props.crudTable.maxColumnWidth,
       isServerRows: props.crudTable.isServerRows || true,
-      loadDataOnStart: props.crudTable.loadDataOnStart,
-      filters: props.crudTable.filters,
-      getServerRows: props.crudTable.service.getAllPaginated.bind(
+      // eslint-disable-next-line vue/no-setup-props-destructure
+      getServerRows: props.crudTable.service.getAll.bind(
         props.crudTable.service
       ),
       actions: [
@@ -129,12 +417,9 @@ export default defineComponent({
           name: 'Ativar',
           icon: '',
           visible(row) {
-            const temAcesso = store.temAcessoNaAcao(
-              props.crudTable.componentName,
-              'Activate'
-            );
-
-            return row.statusId && row.statusId !== 3 && temAcesso;
+            const temAcesso = store.validarPaginaAcao(component, 'Activate');
+            const statusValido = row?.statusId === 1 || row?.statusId === 3;
+            return statusValido && temAcesso;
           },
           async onClick(row) {
             Dialog.create({
@@ -152,16 +437,19 @@ export default defineComponent({
           name: 'Editar',
           icon: '',
           visible(row) {
-            const canGetById = store.temAcessoNaAcao(component, 'GetById');
-            const canUpdate = store.temAcessoNaAcao(component, 'Update');
-            const canEditActive = props.crudTable.isEditActiveRows === true;
-            const hasStatus = row.statusId != undefined && row.statudId != null;
-            const hasPermission = canGetById && canUpdate;
-            const isStatusValid = hasStatus
-              ? row.statusId === 1 || row.statusId === 4
-              : true;
+            let editarAtivos = true;
+            let statusValido = true;
 
-            return (hasPermission && isStatusValid) || canEditActive;
+            const podeListar = store.validarPaginaAcao(component, 'GetById');
+            const podeAtualizar = store.validarPaginaAcao(component, 'Update');
+
+            if (row?.statusId === 2) {
+              editarAtivos = props.crudTable.isEditActiveRows || false;
+            } else {
+              statusValido = row?.statusId === 1 || row?.statusId === 4;
+            }
+
+            return podeListar && editarAtivos && statusValido && podeAtualizar;
           },
           onClick(row) {
             emit('edit', row);
@@ -170,13 +458,10 @@ export default defineComponent({
         {
           name: 'Excluir',
           icon: '',
-          visible() {
-            return true;
-            // const temAcesso = store.temAcessoNaAcao(
-            //   props.crudTable.componentName,
-            //   'Delete'
-            // );
-            // return (row.statusId === 1 || row.statusId === 2) && temAcesso;
+          visible(row) {
+            const temAcesso = store.validarPaginaAcao(component, 'Delete');
+            const statusValido = row.statusId === 1 || row.statusId == 4;
+            return statusValido && temAcesso;
           },
           async onClick(row) {
             Dialog.create({
@@ -194,11 +479,8 @@ export default defineComponent({
           name: 'Inativar',
           icon: '',
           visible(row) {
-            const temAcesso = store.temAcessoNaAcao(
-              props.crudTable.componentName,
-              'Inactivate'
-            );
-            return row.statusId === 3 && temAcesso;
+            const temAcesso = store.validarPaginaAcao(component, 'Inactivate');
+            return row?.statusId === 2 && temAcesso;
           },
           async onClick(row) {
             rowId = row.id;
@@ -209,12 +491,7 @@ export default defineComponent({
           name: 'Visualizar',
           icon: '',
           visible() {
-            const temAcessoGetById = store.temAcessoNaAcao(
-              props.crudTable.componentName,
-              'GetById'
-            );
-
-            return temAcessoGetById;
+            return store.validarPaginaAcao(component, 'GetById');
           },
           onClick(row) {
             emit('show', row);
@@ -260,16 +537,59 @@ export default defineComponent({
       emit('new');
     };
 
+    const getInsertLayout = async () => {
+      await props.crudTable.service.getInsertLayout();
+    };
+
+    const getUpdateLayout = async () => {
+      await props.crudTable.service.getUpdateLayout();
+    };
+
+    const getInactivateLayout = async () => {
+      await props.crudTable.service.getInactivateLayout();
+    };
+
+    const getDeleteLayout = async () => {
+      await props.crudTable.service.getDeleteLayout();
+    };
+
+    const getActivateLayout = async () => {
+      await props.crudTable.service.getActivateLayout();
+    };
+
+    const insertByImportSubmit = async (formValues: any) => {
+      await props.crudTable.service.insertByImport(formValues);
+      inserirPorImportacaoDialog.value = !inserirPorImportacaoDialog.value;
+      refreshRows();
+    };
+
+    const updateByImportSubmit = async (formValues: any) => {
+      await props.crudTable.service.updateByImport(formValues);
+      atualizarPorImportacaoDialog.value = !atualizarPorImportacaoDialog.value;
+      refreshRows();
+    };
+
+    const inactivateByImportSubmit = async (formValues: any) => {
+      await props.crudTable.service.inactivateByImport(formValues);
+      inativarPorImportacaoDialog.value = !inativarPorImportacaoDialog.value;
+      refreshRows();
+    };
+
+    const excluirByImportSubmit = async (formValues: any) => {
+      await props.crudTable.service.deleteByImport(formValues);
+      excluirPorImportacaoDialog.value = !excluirPorImportacaoDialog.value;
+      refreshRows();
+    };
+
+    const ativarByImportSubmit = async (formValues: any) => {
+      await props.crudTable.service.activateByImport(formValues);
+      ativarPorImportacaoDialog.value = !ativarPorImportacaoDialog.value;
+      refreshRows();
+    };
+
     onBeforeMount(() => {
       setActions();
     });
-
-    watch(
-      () => props.crudTable.filters,
-      (newFilters) => {
-        table.value.filters = [...filters.value, ...(newFilters || [])];
-      }
-    );
 
     return {
       table,
@@ -280,10 +600,32 @@ export default defineComponent({
       hasInsertPermission,
       hasExportPermission,
       hasGetAllPaginatedPermission,
+      inserirPlanilhaForm,
+      inserirFormVisible,
+      headerActions,
+      alterarPlanilhaForm,
+      inativarPlanilhaForm,
+      inserirPorImportacaoDialog,
+      atualizarPorImportacaoDialog,
+      inativarPorImportacaoDialog,
+      excluirPlanilhaForm,
+      ativarPlanilhaForm,
+      excluirPorImportacaoDialog,
+      ativarPorImportacaoDialog,
       onClickNew,
       refreshRows,
       exportToExcel,
       onSubmitInactivateForm,
+      getInsertLayout,
+      getUpdateLayout,
+      getInactivateLayout,
+      insertByImportSubmit,
+      updateByImportSubmit,
+      inactivateByImportSubmit,
+      getDeleteLayout,
+      getActivateLayout,
+      excluirByImportSubmit,
+      ativarByImportSubmit,
     };
   },
 });

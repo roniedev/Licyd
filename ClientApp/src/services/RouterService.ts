@@ -1,4 +1,4 @@
-import { IUsuarioModulo } from 'src/components/menu/interfaces/IUsuarioModulo';
+import { IRoute } from 'src/interfaces/IRoute';
 import { Router } from 'vue-router';
 
 class RouterService {
@@ -10,42 +10,26 @@ class RouterService {
     this.router = router;
   }
 
-  removerRotasSemPermisao = (modulos: IUsuarioModulo[]) => {
-    const rotasAplicacao =
+  removerRotasSemPermisao = (rotas: Array<IRoute>) => {
+    const nomeRotasAplicacao =
       this.router
         .getRoutes()
         .find((x) => x.name === 'routesApp')
         ?.children.map((x) => x.name?.toString()) ?? [];
 
-    const rotasUsuario = this.getRotasUsuario(modulos);
+    const nomeDasRotasDoUsuario = rotas.map((x) => x.component);
 
-    if (rotasUsuario) {
-      const rotasParaRemover = rotasAplicacao.filter((item) => {
-        if (item) rotasUsuario.includes(item);
+    if (nomeDasRotasDoUsuario) {
+      const rotasParaRemover = nomeRotasAplicacao.filter((item) => {
+        if (item) nomeDasRotasDoUsuario.includes(item);
       });
 
       rotasParaRemover
-        .filter((item) => item !== 'IndexPage')
+        .filter((item) => item !== 'IndexPage' && item !== 'ComponentesPage')
         .forEach((x) => {
           if (x) this.router.removeRoute(x);
         });
     }
-  };
-
-  getRotasUsuario = (usuarioModulos: IUsuarioModulo[]) => {
-    let paginas: string[] = [];
-
-    usuarioModulos.forEach((modulo) => {
-      paginas = [
-        ...paginas,
-        ...modulo.paginas.map((pagina) => pagina.componente),
-      ];
-
-      if (modulo.subModulos?.length > 0)
-        paginas = [...paginas, ...this.getRotasUsuario(modulo.subModulos)];
-    });
-
-    return paginas;
   };
 }
 

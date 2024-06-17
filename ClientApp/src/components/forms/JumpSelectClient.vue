@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent, onMounted, ref } from 'vue';
 import { IJumpSelectClient } from './interfaces/IJumpSelectClient';
 
 export default defineComponent({
@@ -79,6 +79,8 @@ export default defineComponent({
       emit('update:modelValue', modelValue.value);
       if (props.select.onChange) props.select.onChange(modelValue.value);
     }
+
+    onMounted(() => (modelValue.value = props.select.value));
 
     return {
       modelValue,

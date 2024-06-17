@@ -89,6 +89,7 @@
 <script lang="ts">
 import JumpFormField from './JumpFormField.vue';
 
+import { date } from 'quasar';
 import { groupBy } from 'lodash';
 import { IJumpForm } from './interfaces/IJumpForm';
 import { ICustomRule } from './interfaces/ICustomRule';
@@ -97,24 +98,48 @@ import { defineComponent, onBeforeMount, watch } from 'vue';
 import { IJumpSelectServer } from './interfaces/IJumpSelectServer';
 
 export default defineComponent({
-  name: 'JumpForm',
   components: {
     JumpFormField,
   },
+
   props: {
     form: {
       type: Object as () => IJumpForm,
       required: true,
     },
   },
+
   emits: ['submit', 'cancel'],
+
   setup(props, { emit }) {
     const handleSubmit = () => {
       let formData: any = {};
 
       props.form.fields.forEach((field) => {
         if (!field.disabled && field.value != undefined) {
-          formData[field.name] = field.value;
+          if (
+            field.type === FormElementType.selectClient ||
+            field.type === FormElementType.selectServer
+          ) {
+            const optionValue =
+              (field as IJumpSelectServer).optionValue || 'value';
+
+            if ((field as IJumpSelectServer).multiselect) {
+              formData[field.name] = field.value;
+            } else if ((field as IJumpSelectServer).emitValue === false) {
+              formData[field.name] =
+                typeof field.value === 'number'
+                  ? field.value
+                  : field.value[optionValue];
+            } else {
+              formData[field.name] =
+                typeof field.value == 'object'
+                  ? field.value[optionValue]
+                  : field.value;
+            }
+          } else {
+            formData[field.name] = field.value;
+          }
         }
       });
 
@@ -123,9 +148,7 @@ export default defineComponent({
 
     const handleCancel = () => {
       emit('cancel');
-
-      // eslint-disable-next-line vue/no-mutating-props
-      props.form.data = {};
+      resetForm();
     };
 
     const watchFieldsValue = () => {
@@ -136,7 +159,7 @@ export default defineComponent({
             props.form.fields.forEach((field) => {
               executeFieldCustomRules(field);
               if (field.type === FormElementType.selectServer)
-                setSelectUrlParams(field as IJumpSelectServer);
+                getSelectServerFormUrlParams(field as IJumpSelectServer);
             });
           },
           { immediate: true }
@@ -144,19 +167,11 @@ export default defineComponent({
       });
     };
 
-    const setSelectUrlParams = (field: IJumpSelectServer) => {
-      if (field.urlParams) {
-        field.urlParams.forEach((item) => {
-          const value = item.value
-            ? item.value
-            : getValueByName(item.fieldName);
-
+    const getSelectServerFormUrlParams = (field: IJumpSelectServer) => {
+      if (field.formUrlParams) {
+        field.formUrlParams.forEach((item) => {
+          const value = getValueByName(item.fieldName);
           if (value) item.value = value?.toString();
-          else
-            console.log(
-              'JumpForm.urlParams',
-              `Valor não encontrado para o atributo ${item.fieldName}.`
-            );
         });
       }
     };
@@ -190,7 +205,7 @@ export default defineComponent({
         ? true
         : props.form.disabledRules
         ? validateCustomRules(props.form.disabledRules)
-        : false;
+        : undefined;
     };
 
     const validateCustomRules = (rules: Array<ICustomRule>): boolean => {
@@ -222,49 +237,86 @@ export default defineComponent({
       name: string
     ): string | number | boolean | Array<any> | null | undefined => {
       let input = props.form.fields.find((field) => field.name === name);
-      return input ? input.value : undefined;
+
+      if (!input) return undefined;
+
+      let value = undefined;
+      const isSelectServer = input.type === FormElementType.selectServer;
+      const isSelectClient = input.type === FormElementType.selectClient;
+
+      if (isSelectClient || isSelectServer) {
+        const select = input as IJumpSelectServer;
+        const optionValue = select.optionValue || 'value';
+        value = select.value
+          ? typeof select.value !== 'object'
+            ? select.value
+            : select.value[optionValue]
+          : undefined;
+      } else {
+        value = input.value;
+      }
+
+      return value;
     };
 
     onBeforeMount(() => {
-      executeFormCustomRules(props.form);
-      if (props.form.disabled) {
-        props.form.fields.forEach((field) => {
-          field.disabled = true;
-        });
-      }
+      inicializar();
     });
+
+    const inicializar = () => {
+      executeFormCustomRules(props.form);
+    };
 
     const setData = () => {
       props.form.fields.forEach((field) => {
-        if (props.form.data) field.value = props.form.data[field.name];
-
-        if (field.type === FormElementType.selectServer) {
+        if (!props.form.data) {
+          if (
+            field.type === FormElementType.toggle ||
+            field.type === FormElementType.checkbox
+          ) {
+            field.value = false;
+          }
+        } else if (props.form.data && field.type === FormElementType.date) {
+          field.value = date.formatDate(
+            props.form.data[field.name] as Date,
+            'YYYY-MM-DD'
+          );
+        } else if (field.type === FormElementType.selectServer) {
           const select = field as IJumpSelectServer;
           const labelNameField = select.labelNameField || '';
-
           if (labelNameField && props.form.data) {
             const optionValue = select.optionValue || 'value';
             const optionLabel = select.optionLabel || 'label';
-
             const option: any = {};
             option[optionValue] = field.value;
             option[optionLabel] = props.form.data[labelNameField];
-
-            (field as IJumpSelectServer).options = [];
+            (field as IJumpSelectServer).options = [option];
           } else {
-            console.log(
+            console.error(
               'JumpForm.SelectServer:',
               'Defina o nome do atributo labelNameField.'
             );
           }
+        } else if (props.form.data) {
+          field.value = props.form.data[field.name];
         }
       });
     };
 
+    const resetForm = () => {
+      // eslint-disable-next-line vue/no-mutating-props
+      props.form.data = undefined;
+      props.form.fields.forEach((field) => (field.value = undefined));
+    };
+
     watch(
       () => props.form.data,
-      () => setData(),
-      { immediate: true }
+      () => {
+        setData();
+      },
+      {
+        immediate: true,
+      }
     );
 
     watchFieldsValue();

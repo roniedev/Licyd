@@ -14,9 +14,15 @@
 
 $body-font-family: 'Poppins', sans-serif !default;
 
-$primary: #287eb1;
-$secondary: #008000;
-$accent: #9c27b0;
+$primary: #1aa4e0;
+$primary-light: #6acaff;
+$primary-dark: #0072a9;
+$secondary: #e09d1a;
+$secondary-light: #ffcf5a;
+$secondary-dark: #a66b00;
+$accent: #e01a6c;
+$background: #f5f5f5;
+$text: #212121;
 
 $dark: #1d1d1d;
 $dark-page: #121212;
@@ -29,5 +35,4 @@ $warning: #f2c037;
 $white: #ffffff;
 $excel-green: #008000;
 
-$border-radius: 5px;
-$label-color: #616161;
+$label-color: $text;

@@ -107,12 +107,11 @@ import { IJumpTable } from './interfaces/IJumpTable';
 import { ITableFilter } from './interfaces/ITableFilter';
 import { ITableColumn } from './interfaces/ITableColumn';
 import { computed, defineComponent, ref, watch } from 'vue';
-import { IGetAllRequest } from 'src/interfaces/IGetAllRequest';
 
 import TableActions from './TableActions.vue';
 import TableFilters from './TableFilters.vue';
 import JumpTableFiltersChips from './JumpTableFiltersChips.vue';
-import { onBeforeMount } from 'vue';
+import { IGetAllRequest } from './interfaces/IGetAllRequest';
 
 export default defineComponent({
   name: 'JumpTable',
@@ -151,6 +150,8 @@ export default defineComponent({
       page: 1,
       rowsPerPage: 10,
       rowsNumber: undefined,
+      descending: false,
+      sortBy: 'id',
     });
 
     const columns = computed(() => {
@@ -163,7 +164,7 @@ export default defineComponent({
           field: item.field,
           type: item.type,
           align: item.align || 'center',
-          sortable: item.sortable,
+          sortable: item.sortable || true,
           visible: true,
           maxWidth: item.maxWidth || props.table.maxColumnWidth || maxWidth,
         };
@@ -213,6 +214,8 @@ export default defineComponent({
       const data: IGetAllRequest = {
         skip: (page - 1) * rowsPerPage,
         take: rowsPerPage,
+        orderBy: request?.pagination.sortBy,
+        isAscending: request?.pagination.descending,
         filters: [...(props.table.filters || []), ...filters.value],
       };
 
@@ -223,6 +226,8 @@ export default defineComponent({
           page: page,
           rowsNumber: response.totalRows,
           rowsPerPage: rowsPerPage,
+          sortBy: request?.pagination.sortBy,
+          descending: request?.pagination.descending,
         };
 
         rows.value = response.rows;
@@ -292,20 +297,9 @@ export default defineComponent({
       () => props.table.rows,
       async (newRows) => {
         getRows(newRows);
-      }
+      },
+      { immediate: true }
     );
-
-    watch(
-      () => props.table.filters,
-      (newFilters) => {
-        filters.value = [...filters.value, ...(newFilters || [])];
-        getRows();
-      }
-    );
-
-    onBeforeMount(() => {
-      if (props.table.loadDataOnStart ?? true) getRows();
-    });
 
     return {
       tableFilters,
@@ -330,18 +324,17 @@ export default defineComponent({
 .my-sticky-column-table
   max-width: 100%
 
-  .q-table__top
-    background-color: #FFF
+  // .q-table__top
+  //   background-color: #FFF
 
   thead
-    background-color: #e5f4ff
     font-weight: bolder
 
-  thead tr:first-child th:first-child
-    background-color: #e5f4ff
+  // thead tr:first-child th:first-child
+  //   background-color: #e5f4ff
 
-  td:first-child
-    background-color: #fff
+  // td:first-child
+  //   background-color: #fff
 
   th:first-child,
   td:first-child
@@ -352,11 +345,11 @@ export default defineComponent({
 .my-sticky-last-column-table
   max-width: 100%
 
-  thead tr:last-child th:last-child
-    background-color: #e0f2ff
+  // thead tr:last-child th:last-child
+  //   background-color: #e0f2ff
 
-  td:last-child
-    background-color: #e0f2ff
+  // td:last-child
+  //   background-color: #e0f2ff
 
   th:last-child,
   td:last-child

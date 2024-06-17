@@ -109,12 +109,12 @@ export default defineComponent({
           return 'url';
         case FormElementType.date:
           return 'date';
-        case FormElementType.datetimeLocal:
-          return 'datetime-local';
+        // case FormElementType.datetimeLocal:
+        //   return 'datetime-local';
         case FormElementType.file:
           return 'file';
         default:
-          return 'text';
+          return undefined;
       }
     });
 

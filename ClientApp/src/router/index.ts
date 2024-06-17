@@ -7,12 +7,9 @@ import {
 } from 'vue-router';
 
 import routes from './routes';
-import useAutenticacaoStore from 'src/stores/auth-store';
-import { notificate } from 'src/boot/helpers/NotificationHelper';
+import { notificate } from 'src/helpers/NotificationHelper';
 import RouterService from 'src/services/RouterService';
-// import { notificate } from 'src/boot/helpers/NotificationHelper';
-// import RouterService from 'src/services/RouterService';
-// import useAutenticacaoStore from 'src/stores/auth-store';
+import useAutenticacaoStore from 'src/stores/autenticacao.store';
 
 /*
  * If not building with SSR mode, you can
@@ -33,6 +30,10 @@ export default route(function (/* { store, ssrContext } */) {
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
     routes,
+
+    // Leave this as is and make changes in quasar.conf.js instead!
+    // quasar.conf.js -> build -> vueRouterMode
+    // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
@@ -73,7 +74,7 @@ export default route(function (/* { store, ssrContext } */) {
 
         if (usuario) {
           useAutenticacao.insert(usuario);
-          routerService.removerRotasSemPermisao(useAutenticacao.modules);
+          routerService.removerRotasSemPermisao(useAutenticacao.routes);
           redirecionarusuarioLogado();
           return;
         }

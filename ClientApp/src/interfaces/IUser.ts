@@ -1,15 +1,14 @@
-import { IUsuarioModulo } from 'src/components/menu/interfaces/IUsuarioModulo';
+import { IUserMenu } from 'src/components/menu/interfaces/IUserMenu';
 import { IRoute } from './IRoute';
 
 export interface IUser {
   id: string;
   nome: string;
-  userName: string;
+  usuarioRede: string;
+  usernameErp: string;
   email: string;
+  matricula: string;
   token: string;
-  isHospede: boolean;
-  dataEntrada: Date;
-  dataSaida: Date;
-  modulos: Array<IUsuarioModulo>;
-  routes: Array<IRoute>;
+  usuarioMenu: Array<IUserMenu>;
+  paginasAplicacao: Array<IRoute>;
 }

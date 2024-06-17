@@ -1,0 +1,1 @@
+Infoteuto.BaseApp

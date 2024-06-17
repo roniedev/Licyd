@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { hideLoading, showLoading } from './helpers/LoadingHelper';
+import { hideLoading, showLoading } from 'src/helpers/Loading';
 
 export function getAxiosLogin(loading = true) {
   const api = axios.create({

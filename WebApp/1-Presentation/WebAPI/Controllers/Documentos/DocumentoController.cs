@@ -1,18 +1,18 @@
 ﻿#pragma warning disable IDE0290
 
-using BaseLib;
+using Core;
 using Domain;
 using Services;
 
-namespace WebAPI.Controllers.Documentos
+namespace WebApi.Controllers.Documentos
 {
     /// <summary>
-    /// 
+    /// Cadastro de documentos
     /// </summary>
     public class DocumentoController : CrudStatusController<DocumentoInput, DocumentoOutput, Documento, IDocumentoService, IDocumentoRepository>
     {
         /// <summary>
-        /// 
+        /// Método construtor
         /// </summary>
         /// <param name="appSettings"></param>
         /// <param name="responseObject"></param>

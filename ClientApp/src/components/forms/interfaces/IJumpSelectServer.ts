@@ -18,14 +18,19 @@ export interface IJumpSelectServer extends IFormElement {
   clearable?: boolean;
   mapOptions?: boolean;
   useInput?: boolean;
-  urlParams?: ISelectServerParams[];
+  formUrlParams?: ISelectServerFormUrlParam[];
+  urlParams?: ISelectServerUrlParameters[];
   behavior?: 'dialog' | 'menu';
   labelNameField?: string;
   onChange?: (val: any) => void;
 }
 
-interface ISelectServerParams {
+interface ISelectServerUrlParameters {
+  paramName: string;
+  value: string | boolean | number;
+}
+
+interface ISelectServerFormUrlParam {
   fieldName: string;
-  paramName?: string;
-  value?: string;
+  value?: string | boolean | number;
 }

@@ -21,7 +21,7 @@
     :clearable="select.clearable ?? true"
     :use-input="select.useInput ?? true"
     :map-options="select.mapOptions ?? true"
-    :use-chips="select.useChips"
+    :use-chips="select.useChips ?? true"
     :emit-value="select.emitValue ?? true"
     :disable="select.disabled || false"
     :readonly="select.readonly || false"
@@ -92,35 +92,88 @@ export default defineComponent({
       const length = props.select.searchOnCharLength || 0;
 
       if (filter?.length >= length) {
-        const params = new URLSearchParams();
-
-        if (filter) {
-          params.append('filter', filter);
-        }
-
-        const urlParams = props.select.urlParams || [];
-
-        urlParams.forEach((item) => {
-          if (item.value)
-            params.append(item.paramName || item.fieldName, item.value);
-          else
-            console.log(
-              'JumpSelectServer.filters',
-              'Valor inválido para o atributo filters.'
-            );
-        });
-
-        if (params.toString()) {
-          url += url.includes('?') ? '&' : '?';
-          url += params.toString();
-        }
+        url = getUrlRequest(url, filter);
 
         const response = await api.get(url);
         return response.data;
+
+        // const params = new URLSearchParams();
+
+        // if (filter) {
+        //   params.append('filter', filter);
+        // }
+
+        // const urlParams = props.select.urlParams || [];
+
+        // urlParams.forEach((item) => {
+        //   if (item.value) {
+        //     params.append(item.paramName || item.fieldName, item.value);
+        //   } else
+        //     console.log(
+        //       'JumpSelectServer.filters',
+        //       'Valor inválido para o atributo filters.'
+        //     );
+        // });
+
+        // if (params.toString()) {
+        //   url += url.includes('?') ? '&' : '?';
+        //   url += params.toString();
+        // }
+
+        // const response = await api.get(url);
+        // return response.data;
       }
 
       return [];
     }
+
+    const getUrlRequest = (url: string, filter: string): string => {
+      const params = getUrlFilter(filter);
+      getCustomUrlParams(params);
+      getFormUrlParams(params);
+
+      if (params.toString()) {
+        url += url.includes('?') ? '&' : '?';
+        url += params.toString();
+      }
+
+      return url;
+    };
+
+    const getUrlFilter = (filter: string): URLSearchParams => {
+      const params = new URLSearchParams();
+
+      if (filter) {
+        params.append('filter', filter);
+      }
+
+      return params;
+    };
+
+    const getCustomUrlParams = (params: URLSearchParams) => {
+      const urlParams = props.select.urlParams || [];
+
+      if (urlParams.length == 0) return params;
+
+      urlParams.forEach((param) => {
+        params.append(param.paramName, param.value.toString());
+      });
+    };
+
+    const getFormUrlParams = (params: URLSearchParams) => {
+      const urlParams = props.select.formUrlParams || [];
+
+      if (urlParams.length == 0) return params;
+
+      urlParams.forEach((param) => {
+        param.value
+          ? params.append(param.fieldName, param.value.toString())
+          : console.error(
+              'JumpSelectServer.montarFormUrlParametros',
+              'O campo value deve ter um valor!'
+            );
+      });
+    };
 
     function filtrarFn(val: string, update: any, abort: any, apiUrl: any) {
       const length = props.select.searchOnCharLength || 0;

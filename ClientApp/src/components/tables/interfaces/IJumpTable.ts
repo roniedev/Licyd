@@ -1,9 +1,9 @@
-import { IGetAllRequest } from 'src/interfaces/IGetAllRequest';
-import { IGetAllResponse } from 'src/interfaces/IGetAllResponse';
 import { ITableColumn } from './ITableColumn';
 import { ITableAction } from './ITableAction';
 import { ITablePagination } from './ITablePagination';
 import { ITableFilter } from './ITableFilter';
+import { IGetAllRequest } from './IGetAllRequest';
+import { IGetAllResponse } from './IGetAllResponse';
 
 export interface IJumpTable {
   columns: Array<ITableColumn>;
@@ -19,6 +19,5 @@ export interface IJumpTable {
   isServerRows?: boolean;
   maxColumnWidth?: number;
   filters?: ITableFilter[];
-  loadDataOnStart?: boolean;
   getServerRows?: (data: IGetAllRequest) => Promise<IGetAllResponse | null>;
 }

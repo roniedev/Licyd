@@ -47,14 +47,17 @@ export default class AxiosService {
     url: string,
     formData: FormData
   ): Promise<IAxiosResult> => {
-    const response = await this.api.post(url, formData);
+    const response = await this.api.post(url, formData, {
+      responseType: 'arraybuffer',
+    });
+
+    const blob = new Blob([response.data], {
+      type: 'application/octet-stream',
+    });
 
     return {
       success: response.status === 200 || response.status === 201,
-      data:
-        response.status === 200 || response.status === 201
-          ? response.data
-          : null,
+      data: response.status === 200 ? (blob as Blob) : null,
       status: response.status,
     };
   };

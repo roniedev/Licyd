@@ -1,13 +1,6 @@
 <template>
   <q-dialog v-model="isVisible" position="top" persistent>
-    <q-card
-      style="
-        width: 800px;
-        max-width: 80vw;
-        border-radius: 10px;
-        margin-top: 5px;
-      "
-    >
+    <q-card style="width: 800px; max-width: 80vw; margin-top: 5px">
       <div class="row">
         <div class="col col-md-12">
           <q-card-section>
@@ -108,6 +101,7 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const filters = ref<Array<ITableFilter>>([]);
+    // eslint-disable-next-line vue/no-setup-props-destructure
     const isVisible = ref<boolean>(props.visible);
 
     watch(
@@ -190,6 +184,7 @@ export default defineComponent({
     const removeAllFilters = () => {
       filters.value = [];
       emit('getFilters', filters.value);
+      toggleIsVisible();
     };
 
     const resetForm = () => {

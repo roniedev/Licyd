@@ -1,6 +1,6 @@
 import { IJumpForm } from 'src/components/forms/interfaces/IJumpForm';
-import { IBaseCrudService } from 'src/interfaces/IBaseCrudService';
 import { IJumpTable } from './IJumpTable';
+import { IBaseCrudService } from 'src/interfaces/IBaseCrudService';
 
 export default interface IJumpTableCrud extends IJumpTable {
   service: IBaseCrudService;
@@ -12,4 +12,9 @@ export default interface IJumpTableCrud extends IJumpTable {
   isDeleteVisible?: boolean;
   isEditVisible?: boolean;
   isShowVisible?: boolean;
+  showInsertImport?: boolean;
+  showUpdateImport?: boolean;
+  showInactivateImport?: boolean;
+  showActivateImport?: boolean;
+  showDeleteImport?: boolean;
 }

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <template v-for="(filter, index) in filters" :key="index">
+    <div v-for="(filter, index) in filters" :key="index">
       <q-chip
         removable
         color="primary"
@@ -9,7 +9,7 @@
       >
         <span class="label-chip"> {{ filter.label }}: {{ filter.value }}</span>
       </q-chip>
-    </template>
+    </div>
   </div>
 </template>
 

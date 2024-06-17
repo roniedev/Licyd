@@ -482,10 +482,3 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-
-
-
-# Ignorando a pasta migrations da Lib Data.
-4-Infra/4.1-Data/Data/Migrations/*
-
-!4-Infra/4.1-Data/Data/Migrations/AppDbContextModelSnapshot.cs

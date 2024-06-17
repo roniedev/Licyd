@@ -1,17 +1,17 @@
 import { AxiosError } from 'axios';
 import { IUser } from 'src/interfaces/IUser';
-import { notificate } from 'src/boot/helpers/NotificationHelper';
+import { getAxiosLogin } from 'src/boot/axiosLogin';
+import { notificate } from 'src/helpers/NotificationHelper';
 
 import ILogin from 'src/interfaces/ILogin';
-import useAutenticacaoStore from 'src/stores/auth-store';
-import { getAxiosInstance } from 'src/boot/axios';
+import useAutenticacaoStore from 'src/stores/autenticacao.store';
 
 class AutenticacaoService {
   login = async (login: ILogin) => {
     try {
-      const url = 'auth/authenticate';
-      const api = getAxiosInstance();
-      const response = await api.post(url, login);
+      const url = 'autenticacao/login';
+      const apiAutenticacao = getAxiosLogin();
+      const response = await apiAutenticacao.post(url, login);
 
       const useAutenticacao = useAutenticacaoStore();
       useAutenticacao.insert(response.data as IUser);

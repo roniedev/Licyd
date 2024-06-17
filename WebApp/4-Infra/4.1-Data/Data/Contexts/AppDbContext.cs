@@ -1,12 +1,13 @@
-﻿using BaseLib;
+﻿#pragma warning disable IDE0290
+
+using Core;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data;
 
-public class AppDbContext(DbContextOptions options, AppSettings appSettings, IAuthUser authUser) : BaseDbContext(options, appSettings, authUser)
+public class AppDbContext : BaseDbContext
 {
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public AppDbContext(DbContextOptions options, AppSettings appSettings, IAuthUser authUser) : base(options, appSettings, authUser)
     {
-        base.OnModelCreating(modelBuilder);
     }
 }

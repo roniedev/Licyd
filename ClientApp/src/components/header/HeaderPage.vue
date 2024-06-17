@@ -1,14 +1,7 @@
 <template>
   <q-header class="text-dark q-py-sm" height-hint="90">
     <q-toolbar>
-      <q-btn
-        dense
-        flat
-        round
-        icon="mdi-backburger"
-        @click="handleMenuClick"
-        v-if="isNotHospede"
-      />
+      <q-btn dense flat round icon="mdi-backburger" @click="handleMenuClick" />
       <q-toolbar-title shrink class="text-weight-bold">
         <div class="row items-center">
           <div class="flex items-center">
@@ -24,7 +17,7 @@
 </template>
 
 <script lang="ts">
-import useAutenticacaoStore from 'src/stores/auth-store';
+import useAutenticacaoStore from 'src/stores/autenticacao.store';
 import { defineComponent, ref } from 'vue';
 
 export default defineComponent({
@@ -38,9 +31,9 @@ export default defineComponent({
 
   setup(_props, { emit }) {
     const useAutenticacao = useAutenticacaoStore();
+
     const aplicacaoCodigo = process.env.APLICACAO_CODIGO;
     const username = ref(useAutenticacao.username);
-    const isNotHospede = ref(!useAutenticacao.user?.isHospede);
 
     function logout() {
       useAutenticacao.delete();
@@ -53,7 +46,6 @@ export default defineComponent({
 
     return {
       username,
-      isNotHospede,
       aplicacaoCodigo,
       handleMenuClick,
       logout,

@@ -14,7 +14,7 @@ import { ref } from 'vue';
 import JumpTable from './JumpTable.vue';
 import { ITableFilter } from './interfaces/ITableFilter';
 import { IJumpTable } from './interfaces/IJumpTable';
-import { IGetAllRequest } from 'src/interfaces/IGetAllRequest';
+import { IGetAllRequest } from './interfaces/IGetAllRequest';
 
 export default defineComponent({
   name: 'JumpTableServer',
@@ -30,6 +30,7 @@ export default defineComponent({
   setup(props) {
     let filters: Array<ITableFilter> = [];
 
+    // eslint-disable-next-line vue/no-setup-props-destructure
     const table = ref<IJumpTable>({
       title: props.tableServer.title,
       columns: props.tableServer.columns,
@@ -48,6 +49,8 @@ export default defineComponent({
       const data: IGetAllRequest = {
         skip: (page - 1) * rowsPerPage,
         take: rowsPerPage,
+        orderBy: '',
+        isAscending: true,
         filters: filters,
       };
 

@@ -21,7 +21,7 @@
           </div>
           <br />
           <!-- Nível 0 -->
-          <template v-for="(menu, index) in modulos" :key="index">
+          <template v-for="(menu, index) in menuUsuario" :key="index">
             <!-- Páginas nível 1 -->
             <template v-for="(pagina1, index) in menu.paginas" :key="index">
               <q-item
@@ -35,26 +35,26 @@
                   <q-icon :name="pagina1.icone || 'navigate_next'" />
                 </q-item-section>
                 <q-item-section>
-                  {{ pagina1.nome }}
+                  {{ pagina1.nomePagina }}
                 </q-item-section>
               </q-item>
             </template>
             <!-- Menus nível 1 -->
-            <template v-for="(menu1, index) in menu.subModulos" :key="index">
+            <template v-for="(menu1, index) in menu.menusFilhos" :key="index">
               <q-expansion-item
                 dense
                 :icon="menu1.icone ? menu1.icone : 'navigate_next'"
-                :label="menu1.nome"
+                :label="menu1.nomeMenu"
                 class="q-expansion-item-menu item-nivel-1 q-ma-xs"
                 :content-inset-level="0.1"
               >
                 <template
-                  v-for="(menu2, index) in menu1.subModulos"
+                  v-for="(menu2, index) in menu1.menusFilhos"
                   :key="index"
                 >
                   <q-expansion-item
                     dense
-                    :label="menu2.nome"
+                    :label="menu2.nomeMenu"
                     :icon="menu2.icone ? menu2.icone : 'navigate_next'"
                     class="q-expansion-item-menu item-nivel-1 q-ma-xs"
                     :content-inset-level="0.1"
@@ -75,7 +75,7 @@
                           <q-icon :name="pagina3.icone || 'navigate_next'" />
                         </q-item-section>
                         <q-item-section>
-                          {{ pagina3.nome }}
+                          {{ pagina3.nomePagina }}
                         </q-item-section>
                       </q-item>
                     </template>
@@ -97,7 +97,7 @@
                       <q-icon :name="pagina2.icone || 'navigate_next'" />
                     </q-item-section>
                     <q-item-section>
-                      {{ pagina2.nome }}
+                      {{ pagina2.nomePagina }}
                     </q-item-section>
                   </q-item>
                 </template>
@@ -113,14 +113,14 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { notificate } from 'src/boot/helpers/NotificationHelper';
-import { IUsuarioModulo } from './interfaces/IUsuarioModulo';
+import { IUserMenu } from './interfaces/IUserMenu';
+import { notificate } from 'src/helpers/NotificationHelper';
 
 export default defineComponent({
   name: 'MenuComponent',
   props: {
-    modulos: {
-      type: Array<IUsuarioModulo>,
+    menuUsuario: {
+      type: Array<IUserMenu>,
       default: [],
     },
     visible: {
@@ -148,7 +148,7 @@ export default defineComponent({
     function pushRoute(componente: string) {
       router.push({ name: componente }).catch(() => {
         const mensagem =
-          'A rota não está configurada corretamente, favor entrar em contato com o suporte.';
+          'A rota não está configurada corretamente no DTI0021. Favor entrar em contato com o DTI.';
         notificate(mensagem, 'warning', 'bottom-left', 6000);
       });
     }
@@ -176,7 +176,6 @@ export default defineComponent({
     margin-bottom: 30px
 
   .q-field--outlined
-    background-color: $white
-    border-radius: 8px
+    background-color: #FFF
     border: none
 </style>
